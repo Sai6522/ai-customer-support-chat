@@ -1,0 +1,179 @@
+/* Theme transition styles */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Custom scrollbar for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track, #f1f1f1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #c1c1c1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover, #a8a8a8);
+}
+
+/* Dark mode scrollbar */
+[data-theme="dark"] {
+  --scrollbar-track: #2d2d2d;
+  --scrollbar-thumb: #555555;
+  --scrollbar-thumb-hover: #777777;
+}
+
+/* Light mode scrollbar */
+[data-theme="light"] {
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-thumb-hover: #a8a8a8;
+}
+
+/* Toast container theme adjustments */
+.Toastify__toast-container {
+  z-index: 9999;
+}
+
+.Toastify__toast--dark {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+.Toastify__toast--light {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+/* Chat message styling for better theme support */
+.chat-message {
+  transition: all 0.3s ease;
+}
+
+.chat-message.user {
+  background: linear-gradient(135deg, #1976d2, #42a5f5);
+  color: white;
+}
+
+.chat-message.assistant {
+  background-color: var(--assistant-bg, #f5f5f5);
+  color: var(--assistant-text, #000000);
+  border: 1px solid var(--assistant-border, #e0e0e0);
+}
+
+[data-theme="dark"] .chat-message.assistant {
+  --assistant-bg: #2d2d2d;
+  --assistant-text: #ffffff;
+  --assistant-border: #444444;
+}
+
+[data-theme="light"] .chat-message.assistant {
+  --assistant-bg: #f5f5f5;
+  --assistant-text: #000000;
+  --assistant-border: #e0e0e0;
+}
+
+/* Enhanced AI message visibility in dark mode */
+[data-theme="dark"] .MuiPaper-root {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .MuiPaper-root .MuiTypography-root {
+  color: #ffffff !important;
+}
+
+/* Ensure proper contrast for chat messages */
+[data-theme="dark"] .chat-container .MuiPaper-root:not(.user-message) {
+  background-color: #2d2d2d !important;
+  border: 1px solid #444444 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .chat-container .MuiPaper-root:not(.user-message) {
+  background-color: #ffffff !important;
+  border: 1px solid #e0e0e0 !important;
+  color: #000000 !important;
+}
+
+/* Loading spinner theme support */
+.loading-spinner {
+  color: var(--spinner-color, #1976d2);
+}
+
+[data-theme="dark"] .loading-spinner {
+  --spinner-color: #90caf9;
+}
+
+[data-theme="light"] .loading-spinner {
+  --spinner-color: #1976d2;
+}
+
+/* Form input focus states for better visibility */
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-width: 2px !important;
+}
+
+/* Button hover effects */
+.MuiButton-root {
+  transition: all 0.2s ease !important;
+}
+
+.MuiButton-root:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Card hover effects */
+.MuiCard-root {
+  transition: all 0.3s ease !important;
+}
+
+.MuiCard-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Theme switcher animation */
+.theme-switcher-icon {
+  transition: all 0.3s ease;
+}
+
+.theme-switcher-icon:hover {
+  transform: rotate(180deg);
+}
+
+/* Ensure proper contrast for all text elements */
+[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .MuiButton-contained {
+    border: 2px solid currentColor !important;
+  }
+  
+  .MuiCard-root {
+    border: 1px solid currentColor !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

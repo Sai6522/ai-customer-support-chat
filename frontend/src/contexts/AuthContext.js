@@ -157,8 +157,20 @@ export const AuthProvider = ({ children }) => {
 
   // Logout function
   const logout = () => {
+    // Clear auth data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Clear chat-related data
+    localStorage.removeItem('chatSessionId');
+    localStorage.removeItem('lastUserId');
+    
+    // Clear user-specific chat sessions
+    const currentUserId = state.user?.id;
+    if (currentUserId) {
+      localStorage.removeItem(`chatSessionId_${currentUserId}`);
+    }
+    
     setAuthToken(null);
     dispatch({ type: 'LOGOUT' });
   };

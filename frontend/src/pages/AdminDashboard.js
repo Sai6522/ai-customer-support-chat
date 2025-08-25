@@ -197,16 +197,35 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditDocument = (document) => {
-    setSelectedItem(document);
-    setEditForm({
-      title: document.title,
-      category: document.category,
-      content: document.content || '',
-      tags: document.tags?.join(', ') || '',
-      priority: document.priority || 0,
-    });
-    setEditDialog(true);
+  const handleEditDocument = async (document) => {
+    try {
+      // Fetch fresh data from server to get the content field (similar to handleViewDocument)
+      const response = await adminAPI.getCompanyDataById(document._id);
+      const freshDocument = response.data.data.companyData;
+      
+      setSelectedItem(freshDocument);
+      setEditForm({
+        title: freshDocument.title,
+        category: freshDocument.category,
+        content: freshDocument.content || '',
+        tags: freshDocument.tags?.join(', ') || '',
+        priority: freshDocument.priority || 0,
+      });
+      setEditDialog(true);
+    } catch (error) {
+      console.error('Edit document error:', error);
+      // Fallback to cached data if API fails
+      setSelectedItem(document);
+      setEditForm({
+        title: document.title,
+        category: document.category,
+        content: document.content || '',
+        tags: document.tags?.join(', ') || '',
+        priority: document.priority || 0,
+      });
+      setEditDialog(true);
+      toast.error('Failed to load document content. Using cached data.');
+    }
   };
 
   const handleEditDocumentSubmit = async () => {

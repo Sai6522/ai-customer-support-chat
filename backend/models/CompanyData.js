@@ -104,15 +104,30 @@ companyDataSchema.index({ createdAt: -1 });
 
 // Static method to search company data
 companyDataSchema.statics.search = function(query, limit = 10) {
+  // Extract key terms from the query for better matching
+  const keyTerms = query.toLowerCase().match(/\b(ceo|chief executive|president|founder|leadership|manager|director|head|team|staff|employees|management)\b/g) || [];
+  
+  // Create search conditions
+  const searchConditions = [
+    { title: { $regex: query, $options: 'i' } },
+    { content: { $regex: query, $options: 'i' } },
+    { tags: { $in: [new RegExp(query, 'i')] } },
+  ];
+  
+  // Add key term searches
+  keyTerms.forEach(term => {
+    searchConditions.push(
+      { title: { $regex: term, $options: 'i' } },
+      { content: { $regex: term, $options: 'i' } },
+      { tags: { $in: [new RegExp(term, 'i')] } }
+    );
+  });
+  
   return this.find({
     $and: [
       { isActive: true },
       {
-        $or: [
-          { title: { $regex: query, $options: 'i' } },
-          { content: { $regex: query, $options: 'i' } },
-          { tags: { $in: [new RegExp(query, 'i')] } },
-        ]
+        $or: searchConditions
       }
     ]
   })

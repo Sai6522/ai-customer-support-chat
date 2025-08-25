@@ -30,59 +30,54 @@ const AppContent = () => {
   }
 
   return (
-    <Router>
-      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <Navbar />
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route 
-              path="/chat" 
-              element={
-                <ChatProvider>
-                  <ChatPage />
-                </ChatProvider>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requireAdmin>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="/" element={<Navigate to="/chat" replace />} />
-          </Routes>
+    <ChatProvider>
+      <Router>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Navbar />
+          <Box component="main" sx={{ flexGrow: 1 }}>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/chat" element={<ChatPage />} />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute requireAdmin>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="/" element={<Navigate to="/chat" replace />} />
+            </Routes>
+          </Box>
+          
+          {/* Theme-aware Toast notifications */}
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme={isDarkMode ? "dark" : "light"}
+            toastStyle={{
+              backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff',
+              color: isDarkMode ? '#ffffff' : '#000000',
+            }}
+          />
         </Box>
-        
-        {/* Theme-aware Toast notifications */}
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme={isDarkMode ? "dark" : "light"}
-          toastStyle={{
-            backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff',
-            color: isDarkMode ? '#ffffff' : '#000000',
-          }}
-        />
-      </Box>
-    </Router>
+      </Router>
+    </ChatProvider>
   );
 };
 

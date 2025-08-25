@@ -1,0 +1,173 @@
+{
+  "success": true,
+  "data": {
+    "companyData": [
+      {
+        "_id": "68ac4bac897579f07c49dce7",
+        "title": "Company Information & Location",
+        "type": "knowledge_base",
+        "category": "Company Info",
+        "tags": [
+          "company",
+          "location",
+          "contact",
+          "address",
+          "phone"
+        ],
+        "isActive": true,
+        "priority": 10,
+        "accessCount": 0,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.411Z",
+        "updatedAt": "2025-08-25T11:40:28.411Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce8",
+        "title": "Data Management & Security Policies",
+        "type": "policy",
+        "category": "Data Management",
+        "tags": [
+          "data",
+          "security",
+          "privacy",
+          "gdpr",
+          "management"
+        ],
+        "isActive": true,
+        "priority": 9,
+        "accessCount": 1,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.412Z",
+        "updatedAt": "2025-08-25T11:41:59.905Z",
+        "__v": 0,
+        "lastAccessed": "2025-08-25T11:41:59.902Z"
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce9",
+        "title": "Services & Product Offerings",
+        "type": "knowledge_base",
+        "category": "Services",
+        "tags": [
+          "services",
+          "products",
+          "pricing",
+          "features"
+        ],
+        "isActive": true,
+        "priority": 8,
+        "accessCount": 1,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.412Z",
+        "updatedAt": "2025-08-25T11:41:59.905Z",
+        "__v": 0,
+        "lastAccessed": "2025-08-25T11:41:59.902Z"
+      },
+      {
+        "_id": "68ac4bac897579f07c49dcea",
+        "title": "Team & Management Information",
+        "type": "knowledge_base",
+        "category": "Team",
+        "tags": [
+          "team",
+          "management",
+          "leadership",
+          "culture"
+        ],
+        "isActive": true,
+        "priority": 7,
+        "accessCount": 1,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.413Z",
+        "updatedAt": "2025-08-25T11:41:59.905Z",
+        "__v": 0,
+        "lastAccessed": "2025-08-25T11:41:59.902Z"
+      },
+      {
+        "_id": "68ac4bac897579f07c49dceb",
+        "title": "Company Privacy Policy",
+        "type": "policy",
+        "category": "Legal",
+        "tags": [
+          "privacy",
+          "policy",
+          "legal"
+        ],
+        "isActive": true,
+        "priority": 5,
+        "accessCount": 0,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.413Z",
+        "updatedAt": "2025-08-25T11:40:28.413Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dced",
+        "title": "Troubleshooting Common Issues",
+        "type": "knowledge_base",
+        "category": "Support",
+        "tags": [
+          "troubleshooting",
+          "issues",
+          "help"
+        ],
+        "isActive": true,
+        "priority": 4,
+        "accessCount": 0,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.414Z",
+        "updatedAt": "2025-08-25T11:40:28.414Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dcec",
+        "title": "Getting Started Guide",
+        "type": "knowledge_base",
+        "category": "Documentation",
+        "tags": [
+          "getting-started",
+          "guide",
+          "tutorial"
+        ],
+        "isActive": true,
+        "priority": 4,
+        "accessCount": 0,
+        "version": "1.0",
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.413Z",
+        "updatedAt": "2025-08-25T11:40:28.413Z",
+        "__v": 0
+      }
+    ],
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalItems": 7
+  }
+}

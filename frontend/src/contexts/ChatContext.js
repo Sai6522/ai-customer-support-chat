@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
 import { chatAPI } from '../services/api';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from './AuthContext';
 
 const ChatContext = createContext();
 
@@ -67,12 +68,104 @@ const initialState = {
 // Chat provider component
 export const ChatProvider = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+  const { user, isAuthenticated } = useAuth();
 
-  // Initialize session on mount
+  // Load chat history
+  const loadChatHistory = useCallback(async (sessionId) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      const response = await chatAPI.getHistory(sessionId);
+      const messages = response.data.data.messages || [];
+      
+      dispatch({ type: 'SET_MESSAGES', payload: messages });
+      
+      if (response.data.data.conversationId) {
+        dispatch({ type: 'SET_CONVERSATION_ID', payload: response.data.data.conversationId });
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load chat history' });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+
+  // Initialize session for specific user
+  const initSessionForUser = useCallback(async (userId) => {
+    try {
+      // Check if there's an existing session for this user
+      let sessionId = localStorage.getItem(`chatSessionId_${userId}`);
+      
+      if (!sessionId) {
+        // Create new session for this user
+        const response = await chatAPI.createSession();
+        sessionId = response.data.data.sessionId;
+        localStorage.setItem(`chatSessionId_${userId}`, sessionId);
+      }
+
+      dispatch({ type: 'SET_SESSION_ID', payload: sessionId });
+
+      // Load existing messages for this session
+      await loadChatHistory(sessionId);
+    } catch (error) {
+      console.error('Error initializing session for user:', error);
+      // Fallback to generating UUID if API fails
+      const fallbackSessionId = uuidv4();
+      localStorage.setItem(`chatSessionId_${userId}`, fallbackSessionId);
+      dispatch({ type: 'SET_SESSION_ID', payload: fallbackSessionId });
+    }
+  }, [loadChatHistory]);
+
+  // Clear chat when user changes or logs out
+  useEffect(() => {
+    const clearChatForUserChange = () => {
+      // Clear chat state
+      dispatch({ type: 'CLEAR_CHAT' });
+      
+      // Remove old session from localStorage
+      localStorage.removeItem('chatSessionId');
+      
+      // Clear any user-specific chat data
+      const currentUserId = user?.id;
+      if (currentUserId) {
+        localStorage.removeItem(`chatSessionId_${currentUserId}`);
+      }
+    };
+
+    // If user logs out, clear chat
+    if (!isAuthenticated) {
+      clearChatForUserChange();
+      return;
+    }
+
+    // If user changes, clear chat and initialize new session
+    if (user?.id) {
+      const lastUserId = localStorage.getItem('lastUserId');
+      const currentUserId = user.id;
+
+      if (lastUserId && lastUserId !== currentUserId) {
+        // User has changed, clear previous chat
+        clearChatForUserChange();
+      }
+
+      // Store current user ID
+      localStorage.setItem('lastUserId', currentUserId);
+      
+      // Initialize session for current user
+      initSessionForUser(currentUserId);
+    }
+  }, [user, isAuthenticated, initSessionForUser]);
+
+  // Initialize session on mount (for anonymous users or initial load)
   useEffect(() => {
     const initSession = async () => {
+      // Skip if user is authenticated (handled by user effect above)
+      if (isAuthenticated && user?.id) {
+        return;
+      }
+
       try {
-        // Check if there's an existing session in localStorage
+        // For anonymous users, use general session
         let sessionId = localStorage.getItem('chatSessionId');
         
         if (!sessionId) {
@@ -95,28 +188,11 @@ export const ChatProvider = ({ children }) => {
       }
     };
 
-    initSession();
-  }, []); // Empty dependency array is correct here as we only want this to run once
-
-  // Load chat history
-  const loadChatHistory = async (sessionId) => {
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      const response = await chatAPI.getHistory(sessionId);
-      const messages = response.data.data.messages || [];
-      
-      dispatch({ type: 'SET_MESSAGES', payload: messages });
-      
-      if (response.data.data.conversationId) {
-        dispatch({ type: 'SET_CONVERSATION_ID', payload: response.data.data.conversationId });
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-      dispatch({ type: 'SET_ERROR', payload: 'Failed to load chat history' });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
+    // Only initialize if not authenticated or no user
+    if (!isAuthenticated || !user?.id) {
+      initSession();
     }
-  };
+  }, [isAuthenticated, user?.id, loadChatHistory]);
 
   // Send message
   const sendMessage = async (content) => {
@@ -176,12 +252,23 @@ export const ChatProvider = ({ children }) => {
       dispatch({ type: 'CLEAR_CHAT' });
       
       // Remove old session from localStorage
-      localStorage.removeItem('chatSessionId');
+      const currentUserId = user?.id;
+      if (currentUserId) {
+        localStorage.removeItem(`chatSessionId_${currentUserId}`);
+      } else {
+        localStorage.removeItem('chatSessionId');
+      }
       
       // Create new session
       const response = await chatAPI.createSession();
       const sessionId = response.data.data.sessionId;
-      localStorage.setItem('chatSessionId', sessionId);
+      
+      // Store session with user-specific key if authenticated
+      if (currentUserId) {
+        localStorage.setItem(`chatSessionId_${currentUserId}`, sessionId);
+      } else {
+        localStorage.setItem('chatSessionId', sessionId);
+      }
       
       dispatch({ type: 'SET_SESSION_ID', payload: sessionId });
     } catch (error) {

@@ -4,7 +4,7 @@ const Conversation = require('../models/Conversation');
 const FAQ = require('../models/FAQ');
 const CompanyData = require('../models/CompanyData');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
-const { generateResponse, generateConversationSummary } = require('../utils/geminiService');
+const { generateResponse, generateConversationSummary, isCompanyDataQuery } = require('../utils/geminiService');
 const fs = require('fs');
 const path = require('path');
 
@@ -56,13 +56,49 @@ router.post('/message', optionalAuth, async (req, res) => {
       CompanyData.search(message, 3),
     ]);
 
-    const context = [
-      ...faqs.map(faq => ({ title: faq.question, content: faq.answer })),
-      ...companyData.map(data => ({ title: data.title, content: data.content })),
+    // Create context with priority information
+    const contextItems = [
+      ...faqs.map(faq => ({ 
+        title: faq.question, 
+        content: faq.answer, 
+        priority: faq.priority,
+        source: 'FAQ'
+      })),
+      ...companyData.map(data => ({ 
+        title: data.title, 
+        content: data.content, 
+        priority: data.priority,
+        source: 'CompanyData'
+      })),
     ];
 
-    // Generate AI response
-    const aiResponse = await generateResponse(conversation.messages, context);
+    // Sort context by priority (highest first) and take top items
+    const sortedContext = contextItems
+      .sort((a, b) => b.priority - a.priority)
+      .slice(0, 6); // Limit to top 6 items
+
+    // Convert back to the format expected by AI
+    const context = sortedContext.map(item => ({
+      title: item.title,
+      content: item.content
+    }));
+
+    // Debug logging
+    console.log('🔍 DEBUG: Search query:', message);
+    console.log('🔍 DEBUG: FAQs found:', faqs.length);
+    console.log('🔍 DEBUG: Company data found:', companyData.length);
+    console.log('🔍 DEBUG: Context items before sorting:', contextItems.length);
+    console.log('🔍 DEBUG: Context items after sorting:', sortedContext.length);
+    console.log('🔍 DEBUG: Final context sent to AI:');
+    context.forEach((item, index) => {
+      console.log(`  ${index + 1}. ${item.title}: ${item.content ? item.content.substring(0, 100) + '...' : 'No content'}`);
+    });
+
+    // Check if this is a company-related query for enhanced response
+    const isCompanyQuery = isCompanyDataQuery(message);
+
+    // Generate AI response with enhanced context for company queries
+    const aiResponse = await generateResponse(conversation.messages, context, isCompanyQuery);
 
     // Add bot message
     conversation.messages.push({

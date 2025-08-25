@@ -84,15 +84,30 @@ faqSchema.index({ isActive: 1, priority: -1 });
 
 // Static method to search FAQs
 faqSchema.statics.search = function(query, limit = 10) {
+  // Extract key terms from the query for better matching
+  const keyTerms = query.toLowerCase().match(/\b(ceo|chief executive|president|founder|leadership|manager|director|head|team|staff|employees)\b/g) || [];
+  
+  // Create search conditions
+  const searchConditions = [
+    { question: { $regex: query, $options: 'i' } },
+    { answer: { $regex: query, $options: 'i' } },
+    { tags: { $in: [new RegExp(query, 'i')] } },
+  ];
+  
+  // Add key term searches
+  keyTerms.forEach(term => {
+    searchConditions.push(
+      { question: { $regex: term, $options: 'i' } },
+      { answer: { $regex: term, $options: 'i' } },
+      { tags: { $in: [new RegExp(term, 'i')] } }
+    );
+  });
+  
   return this.find({
     $and: [
       { isActive: true },
       {
-        $or: [
-          { question: { $regex: query, $options: 'i' } },
-          { answer: { $regex: query, $options: 'i' } },
-          { tags: { $in: [new RegExp(query, 'i')] } },
-        ]
+        $or: searchConditions
       }
     ]
   })

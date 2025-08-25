@@ -85,6 +85,187 @@ const seedData = async () => {
     // Create demo company data
     const companyDataItems = [
       {
+        title: 'Company Information & Location',
+        content: `Company Overview:
+Name: AI Customer Support Platform Inc.
+Founded: 2024
+Type: Technology Company specializing in AI-powered customer support solutions
+
+Headquarters:
+Address: 123 Innovation Drive, Tech Valley, CA 94000, USA
+Phone: +1 (800) SUPPORT (786-7678)
+Email: info@aicustomersupport.com
+Support Email: support@aicustomersupport.com
+
+Regional Offices:
+- New York: 456 Business Ave, New York, NY 10001
+- London: 789 Tech Street, London, UK EC1A 1BB
+- Singapore: 321 Innovation Hub, Singapore 018989
+
+Business Hours:
+- Customer Support: 24/7 (AI-powered)
+- Live Agent Support: Monday-Friday, 9 AM - 6 PM EST
+- Technical Support: Monday-Sunday, 8 AM - 8 PM EST
+- Sales Team: Monday-Friday, 8 AM - 7 PM EST
+
+Mission: To revolutionize customer support through intelligent AI solutions
+Vision: Making customer support accessible, efficient, and delightful for everyone`,
+        category: 'Company Info',
+        type: 'knowledge_base',
+        tags: ['company', 'location', 'contact', 'address', 'phone'],
+        priority: 10,
+        createdBy: adminUser._id,
+      },
+      {
+        title: 'Data Management & Security Policies',
+        content: `Data Management Framework:
+
+1. Data Collection:
+- User account information (name, email, preferences)
+- Conversation history and chat logs
+- Usage analytics and performance metrics
+- Support tickets and feedback
+
+2. Data Storage:
+- Primary Database: MongoDB Atlas (encrypted)
+- Backup Systems: AWS S3 with encryption
+- Data Retention: 7 years for compliance
+- Geographic Storage: US, EU, APAC regions
+
+3. Data Security Measures:
+- End-to-end encryption (AES-256)
+- Multi-factor authentication for admin access
+- Regular security audits and penetration testing
+- SOC 2 Type II certified
+- GDPR and CCPA compliant
+- ISO 27001 certified
+
+4. Data Access Controls:
+- Role-based access permissions
+- Audit logs for all data access
+- Regular access reviews
+- Principle of least privilege
+
+5. Data Processing:
+- AI model training (anonymized data only)
+- Performance analytics and reporting
+- Customer support optimization
+- Compliance reporting
+
+6. User Rights:
+- Data portability (export your data)
+- Right to deletion (GDPR Article 17)
+- Data correction and updates
+- Opt-out of analytics tracking
+
+Contact our Data Protection Officer: dpo@aicustomersupport.com`,
+        category: 'Data Management',
+        type: 'policy',
+        tags: ['data', 'security', 'privacy', 'gdpr', 'management'],
+        priority: 9,
+        createdBy: adminUser._id,
+      },
+      {
+        title: 'Services & Product Offerings',
+        content: `Our Services:
+
+1. AI Customer Support Platform:
+- 24/7 AI-powered chat support
+- Multi-language support (15+ languages)
+- Intelligent routing and escalation
+- Real-time sentiment analysis
+- Custom knowledge base integration
+
+2. Admin Dashboard:
+- User management and analytics
+- Conversation monitoring
+- FAQ and knowledge base management
+- Performance metrics and reporting
+- System health monitoring
+
+3. Integration Services:
+- REST API for third-party integration
+- Webhook support for real-time updates
+- CRM integration (Salesforce, HubSpot)
+- Help desk integration (Zendesk, Freshdesk)
+- E-commerce platform integration
+
+4. Enterprise Features:
+- Single Sign-On (SSO) support
+- Custom branding and white-labeling
+- Advanced analytics and reporting
+- Dedicated account management
+- SLA guarantees (99.9% uptime)
+
+5. Pricing Plans:
+- Starter: $29/month (up to 1,000 conversations)
+- Professional: $99/month (up to 10,000 conversations)
+- Enterprise: Custom pricing (unlimited conversations)
+- All plans include: AI support, basic analytics, email support
+
+6. Add-on Services:
+- Custom AI model training: $500/month
+- Advanced analytics: $200/month
+- Priority support: $100/month
+- Custom integrations: Quote on request
+
+Contact our sales team: sales@aicustomersupport.com`,
+        category: 'Services',
+        type: 'knowledge_base',
+        tags: ['services', 'products', 'pricing', 'features'],
+        priority: 8,
+        createdBy: adminUser._id,
+      },
+      {
+        title: 'Team & Management Information',
+        content: `Our Team:
+
+Leadership Team:
+- CEO: Sarah Johnson (Former VP of Customer Success at TechCorp)
+- CTO: Michael Chen (Ex-Google AI Research)
+- VP of Engineering: David Rodriguez (Former Amazon Principal Engineer)
+- VP of Sales: Emily Watson (Former Salesforce Director)
+- Head of Customer Success: James Kim (Former Zendesk Manager)
+
+Engineering Team:
+- 15 Full-stack developers
+- 8 AI/ML engineers
+- 5 DevOps engineers
+- 6 QA engineers
+- 4 Security specialists
+
+Customer Success Team:
+- 12 Customer success managers
+- 8 Technical support specialists
+- 6 Implementation consultants
+- 4 Training specialists
+
+Company Culture:
+- Remote-first company with global talent
+- Commitment to diversity and inclusion
+- Continuous learning and development
+- Work-life balance priority
+- Innovation and experimentation encouraged
+
+Certifications & Partnerships:
+- Google Cloud Partner
+- AWS Advanced Technology Partner
+- Microsoft Azure Certified
+- Salesforce ISV Partner
+- SOC 2 Type II Certified
+- ISO 27001 Certified
+
+Awards & Recognition:
+- 2024 Best AI Customer Support Solution
+- 2024 TechCrunch Startup of the Year Finalist
+- 2024 Customer Choice Award Winner`,
+        category: 'Team',
+        type: 'knowledge_base',
+        tags: ['team', 'management', 'leadership', 'culture'],
+        priority: 7,
+        createdBy: adminUser._id,
+      },
+      {
         title: 'Company Privacy Policy',
         content: `Privacy Policy
 

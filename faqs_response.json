@@ -1,0 +1,125 @@
+{
+  "success": true,
+  "data": {
+    "faqs": [
+      {
+        "_id": "68ac4bac897579f07c49dce4",
+        "question": "Is my data secure?",
+        "answer": "Yes, we take data security very seriously. All data is encrypted in transit and at rest. We comply with industry-standard security practices and regulations.",
+        "category": "Security",
+        "tags": [
+          "security",
+          "data",
+          "privacy"
+        ],
+        "priority": 5,
+        "isActive": true,
+        "viewCount": 0,
+        "helpfulCount": 0,
+        "notHelpfulCount": 0,
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.329Z",
+        "updatedAt": "2025-08-25T11:40:28.329Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce3",
+        "question": "How do I cancel my subscription?",
+        "answer": "You can cancel your subscription at any time by going to your account settings and clicking on \"Cancel Subscription\". Your access will continue until the end of your current billing period.",
+        "category": "Billing",
+        "tags": [
+          "subscription",
+          "cancel",
+          "billing"
+        ],
+        "priority": 5,
+        "isActive": true,
+        "viewCount": 0,
+        "helpfulCount": 0,
+        "notHelpfulCount": 0,
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.328Z",
+        "updatedAt": "2025-08-25T11:40:28.328Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce1",
+        "question": "How do I reset my password?",
+        "answer": "To reset your password, click on the \"Forgot Password\" link on the login page and follow the instructions sent to your email.",
+        "category": "Account",
+        "tags": [
+          "password",
+          "reset",
+          "account"
+        ],
+        "priority": 5,
+        "isActive": true,
+        "viewCount": 0,
+        "helpfulCount": 0,
+        "notHelpfulCount": 0,
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.327Z",
+        "updatedAt": "2025-08-25T11:40:28.327Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce5",
+        "question": "How do I contact technical support?",
+        "answer": "You can contact technical support through this chat interface, email us at support@company.com, or call our support hotline at 1-800-SUPPORT.",
+        "category": "Support",
+        "tags": [
+          "contact",
+          "support",
+          "help"
+        ],
+        "priority": 4,
+        "isActive": true,
+        "viewCount": 1,
+        "helpfulCount": 0,
+        "notHelpfulCount": 0,
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.329Z",
+        "updatedAt": "2025-08-25T11:41:59.904Z",
+        "__v": 0
+      },
+      {
+        "_id": "68ac4bac897579f07c49dce2",
+        "question": "What are your business hours?",
+        "answer": "Our customer support is available 24/7. However, our live agents are available Monday to Friday, 9 AM to 6 PM EST.",
+        "category": "General",
+        "tags": [
+          "hours",
+          "support",
+          "availability"
+        ],
+        "priority": 4,
+        "isActive": true,
+        "viewCount": 0,
+        "helpfulCount": 0,
+        "notHelpfulCount": 0,
+        "createdBy": {
+          "_id": "68ac4bab897579f07c49dcdd",
+          "username": "admin"
+        },
+        "createdAt": "2025-08-25T11:40:28.328Z",
+        "updatedAt": "2025-08-25T11:40:28.328Z",
+        "__v": 0
+      }
+    ],
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalFAQs": 5
+  }
+}

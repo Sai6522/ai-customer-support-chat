@@ -1,0 +1,1 @@
+{"success":false,"message":"Failed to process message","error":"Conversation validation failed: messages.7.content: Message cannot exceed 2000 characters"}

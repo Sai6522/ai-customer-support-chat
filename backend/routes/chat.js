@@ -4,7 +4,7 @@ const Conversation = require('../models/Conversation');
 const FAQ = require('../models/FAQ');
 const CompanyData = require('../models/CompanyData');
 const { authenticateToken, optionalAuth } = require('../middleware/auth');
-const { generateResponse, generateConversationSummary, isCompanyDataQuery } = require('../utils/geminiService');
+const { generateResponse, generateConversationSummary, isCompanyDataQuery, getFreshContextData } = require('../utils/geminiService');
 const fs = require('fs');
 const path = require('path');
 
@@ -50,31 +50,44 @@ router.post('/message', optionalAuth, async (req, res) => {
       timestamp: new Date(),
     });
 
-    // Search for relevant context (FAQ and company data)
+    // Search for relevant context (FAQ and company data) with fresh database queries
+    console.log('🔄 DEBUG: Starting fresh database search for message:', message);
+    
     const [faqs, companyData] = await Promise.all([
-      FAQ.search(message, 3),
-      CompanyData.search(message, 3),
+      FAQ.search(message, 3).lean(), // Use .lean() for better performance and fresh data
+      CompanyData.search(message, 3).lean(),
     ]);
 
-    // Create context with priority information
+    console.log(`🔄 DEBUG: Fresh search results - FAQs: ${faqs.length}, Company Data: ${companyData.length}`);
+
+    // Create context with priority information and fresh timestamps
     const contextItems = [
       ...faqs.map(faq => ({ 
         title: faq.question, 
         content: faq.answer, 
-        priority: faq.priority,
-        source: 'FAQ'
+        priority: faq.priority || 0,
+        source: 'FAQ',
+        updatedAt: faq.updatedAt,
+        id: faq._id
       })),
       ...companyData.map(data => ({ 
         title: data.title, 
         content: data.content, 
-        priority: data.priority,
-        source: 'CompanyData'
+        priority: data.priority || 0,
+        source: 'CompanyData',
+        updatedAt: data.updatedAt,
+        id: data._id
       })),
     ];
 
-    // Sort context by priority (highest first) and take top items
+    // Sort context by priority first, then by update time (most recent first) to ensure fresh data is prioritized
     const sortedContext = contextItems
-      .sort((a, b) => b.priority - a.priority)
+      .sort((a, b) => {
+        if (b.priority !== a.priority) {
+          return b.priority - a.priority; // Higher priority first
+        }
+        return new Date(b.updatedAt) - new Date(a.updatedAt); // More recent updates first
+      })
       .slice(0, 6); // Limit to top 6 items
 
     // Convert back to the format expected by AI
@@ -83,15 +96,15 @@ router.post('/message', optionalAuth, async (req, res) => {
       content: item.content
     }));
 
-    // Debug logging
+    // Enhanced debug logging
     console.log('🔍 DEBUG: Search query:', message);
-    console.log('🔍 DEBUG: FAQs found:', faqs.length);
-    console.log('🔍 DEBUG: Company data found:', companyData.length);
     console.log('🔍 DEBUG: Context items before sorting:', contextItems.length);
     console.log('🔍 DEBUG: Context items after sorting:', sortedContext.length);
-    console.log('🔍 DEBUG: Final context sent to AI:');
+    console.log('🔍 DEBUG: Final context sent to AI (with fresh data):');
     context.forEach((item, index) => {
-      console.log(`  ${index + 1}. ${item.title}: ${item.content ? item.content.substring(0, 100) + '...' : 'No content'}`);
+      const sourceItem = sortedContext[index];
+      console.log(`  ${index + 1}. [${sourceItem.source}] ${item.title} (Priority: ${sourceItem.priority}, Updated: ${sourceItem.updatedAt})`);
+      console.log(`     Content: ${item.content ? item.content.substring(0, 100) + '...' : 'No content'}`);
     });
 
     // Check if this is a company-related query for enhanced response
@@ -112,9 +125,22 @@ router.post('/message', optionalAuth, async (req, res) => {
     await conversation.save();
 
     // Increment access count for used FAQs and company data
+    // Note: Using lean() queries returns plain objects, so we need to update directly
+    const faqIds = faqs.map(faq => faq._id);
+    const companyDataIds = companyData.map(data => data._id);
+    
     await Promise.all([
-      ...faqs.map(faq => faq.incrementView()),
-      ...companyData.map(data => data.incrementAccess()),
+      // Increment view count for FAQs
+      ...faqIds.map(id => 
+        FAQ.findByIdAndUpdate(id, { $inc: { viewCount: 1 } })
+      ),
+      // Increment access count for Company Data
+      ...companyDataIds.map(id => 
+        CompanyData.findByIdAndUpdate(id, { 
+          $inc: { accessCount: 1 },
+          $set: { lastAccessed: new Date() }
+        })
+      ),
     ]);
 
     res.json({

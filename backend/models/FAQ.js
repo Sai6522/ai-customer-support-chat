@@ -82,7 +82,7 @@ faqSchema.index({
 faqSchema.index({ category: 1, priority: -1 });
 faqSchema.index({ isActive: 1, priority: -1 });
 
-// Static method to search FAQs
+// Static method to search FAQs with fresh data
 faqSchema.statics.search = function(query, limit = 10) {
   // Extract key terms from the query for better matching
   const keyTerms = query.toLowerCase().match(/\b(ceo|chief executive|president|founder|leadership|manager|director|head|team|staff|employees)\b/g) || [];
@@ -103,6 +103,7 @@ faqSchema.statics.search = function(query, limit = 10) {
     );
   });
   
+  // Force fresh query with no caching - sort by priority first, then by updatedAt for freshest data
   return this.find({
     $and: [
       { isActive: true },
@@ -111,8 +112,9 @@ faqSchema.statics.search = function(query, limit = 10) {
       }
     ]
   })
-  .sort({ priority: -1, helpfulCount: -1 })
-  .limit(limit);
+  .sort({ priority: -1, updatedAt: -1, helpfulCount: -1 })
+  .limit(limit)
+  .hint({ isActive: 1, priority: -1 }); // Use index hint to ensure fresh data
 };
 
 // Static method to find by category

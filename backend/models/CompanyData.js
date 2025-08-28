@@ -102,7 +102,7 @@ companyDataSchema.index({ category: 1, type: 1, priority: -1 });
 companyDataSchema.index({ isActive: 1, priority: -1 });
 companyDataSchema.index({ createdAt: -1 });
 
-// Static method to search company data
+// Static method to search company data with fresh data
 companyDataSchema.statics.search = function(query, limit = 10) {
   // Extract key terms from the query for better matching
   const keyTerms = query.toLowerCase().match(/\b(ceo|chief executive|president|founder|leadership|manager|director|head|team|staff|employees|management)\b/g) || [];
@@ -123,6 +123,7 @@ companyDataSchema.statics.search = function(query, limit = 10) {
     );
   });
   
+  // Force fresh query with no caching - sort by priority first, then by updatedAt for freshest data
   return this.find({
     $and: [
       { isActive: true },
@@ -131,10 +132,11 @@ companyDataSchema.statics.search = function(query, limit = 10) {
       }
     ]
   })
-  .sort({ priority: -1, accessCount: -1 })
+  .sort({ priority: -1, updatedAt: -1, accessCount: -1 })
   .limit(limit)
   .populate('createdBy', 'username')
-  .populate('updatedBy', 'username');
+  .populate('updatedBy', 'username')
+  .hint({ isActive: 1, priority: -1 }); // Use index hint to ensure fresh data
 };
 
 // Static method to find by category

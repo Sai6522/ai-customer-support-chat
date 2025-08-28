@@ -36,7 +36,7 @@ const isCompanyDataQuery = (message) => {
   return companyKeywords.some(keyword => messageLower.includes(keyword));
 };
 
-// Enhanced function to get comprehensive company data
+// Enhanced function to get comprehensive company data with real-time updates
 const getCompanyDataContext = async (message) => {
   try {
     const FAQ = require('../models/FAQ');
@@ -44,10 +44,12 @@ const getCompanyDataContext = async (message) => {
     const User = require('../models/User');
     const Conversation = require('../models/Conversation');
 
-    // Get all relevant company information
+    console.log('🔄 DEBUG: Fetching fresh data from database...');
+
+    // Get all relevant company information with fresh queries
     const [faqs, companyData, userStats, conversationStats] = await Promise.all([
-      FAQ.find({ isActive: true }).sort({ priority: -1, accessCount: -1 }).limit(10),
-      CompanyData.find({ isActive: true }).sort({ priority: -1, accessCount: -1 }).limit(10),
+      FAQ.find({ isActive: true }).sort({ priority: -1, updatedAt: -1, accessCount: -1 }).limit(10).lean(),
+      CompanyData.find({ isActive: true }).sort({ priority: -1, updatedAt: -1, accessCount: -1 }).limit(10).lean(),
       User.aggregate([
         {
           $group: {
@@ -69,6 +71,8 @@ const getCompanyDataContext = async (message) => {
         }
       ])
     ]);
+
+    console.log(`🔄 DEBUG: Found ${faqs.length} FAQs and ${companyData.length} company documents`);
 
     // Build comprehensive context
     let context = [];
@@ -106,25 +110,91 @@ Average Rating: ${stats.conversations.avgRating ? stats.conversations.avgRating.
       `
     });
 
-    // Add FAQs
+    // Add FAQs with fresh data
     faqs.forEach(faq => {
       context.push({
         title: `FAQ: ${faq.question}`,
-        content: faq.answer
+        content: faq.answer,
+        priority: faq.priority,
+        updatedAt: faq.updatedAt
       });
     });
 
-    // Add company documents
+    // Add company documents with fresh data
     companyData.forEach(data => {
       context.push({
         title: data.title,
-        content: data.content
+        content: data.content,
+        priority: data.priority,
+        updatedAt: data.updatedAt
       });
     });
 
     return context;
   } catch (error) {
     console.error('Error getting company data context:', error);
+    return [];
+  }
+};
+
+// New function to get fresh context data for specific queries
+const getFreshContextData = async (query, limit = 6) => {
+  try {
+    const FAQ = require('../models/FAQ');
+    const CompanyData = require('../models/CompanyData');
+
+    console.log('🔄 DEBUG: Getting fresh context data for query:', query);
+
+    // Force fresh database queries with no caching
+    const [faqs, companyData] = await Promise.all([
+      FAQ.search(query, Math.ceil(limit / 2)).lean(),
+      CompanyData.search(query, Math.ceil(limit / 2)).lean()
+    ]);
+
+    console.log(`🔄 DEBUG: Fresh search results - FAQs: ${faqs.length}, Company Data: ${companyData.length}`);
+
+    // Create context with priority information and timestamps
+    const contextItems = [
+      ...faqs.map(faq => ({ 
+        title: faq.question, 
+        content: faq.answer, 
+        priority: faq.priority || 0,
+        source: 'FAQ',
+        updatedAt: faq.updatedAt,
+        id: faq._id
+      })),
+      ...companyData.map(data => ({ 
+        title: data.title, 
+        content: data.content, 
+        priority: data.priority || 0,
+        source: 'CompanyData',
+        updatedAt: data.updatedAt,
+        id: data._id
+      })),
+    ];
+
+    // Sort by priority first, then by update time (most recent first)
+    const sortedContext = contextItems
+      .sort((a, b) => {
+        if (b.priority !== a.priority) {
+          return b.priority - a.priority; // Higher priority first
+        }
+        return new Date(b.updatedAt) - new Date(a.updatedAt); // More recent first
+      })
+      .slice(0, limit);
+
+    console.log('🔄 DEBUG: Sorted context items:');
+    sortedContext.forEach((item, index) => {
+      console.log(`  ${index + 1}. [${item.source}] ${item.title} (Priority: ${item.priority}, Updated: ${item.updatedAt})`);
+    });
+
+    return sortedContext.map(item => ({
+      title: item.title,
+      content: item.content
+    }));
+
+  } catch (error) {
+    console.error('Error getting fresh context data:', error);
     return [];
   }
 };
@@ -143,28 +213,42 @@ const generateResponse = async (messages, context = null, isEnhanced = false) =>
     // Prepare the conversation context
     let conversationContext = SYSTEM_PROMPT + '\n\n';
 
-    // PRIORITY 1: Use the specific context passed from chat route (this contains sorted FAQs/company data)
+    // PRIORITY 1: Use the specific context passed from chat route (this contains fresh sorted FAQs/company data)
     if (context && context.length > 0) {
       console.log('🔍 DEBUG: Using priority context from chat route:', context.length, 'items');
       const contextContent = context.map((item, index) => 
         `${index + 1}. ${item.title}: ${item.content}`
       ).join('\n\n');
       
-      conversationContext += `CRITICAL INSTRUCTIONS: You MUST use the information below in the EXACT ORDER provided. The information is sorted by priority - ALWAYS use the FIRST item that answers the user's question. DO NOT combine or mix information from multiple sources.\n\n`;
-      conversationContext += `PRIORITY-ORDERED INFORMATION:\n${contextContent}\n\n`;
-      conversationContext += `STRICT RULE: If the user asks about something mentioned in item #1, use ONLY item #1. Ignore all other items. If item #1 doesn't answer the question, then check item #2, and so on.\n\n`;
+      conversationContext += `CRITICAL INSTRUCTIONS: You MUST use the information below in the EXACT ORDER provided. The information is sorted by priority and recency - ALWAYS use the FIRST item that answers the user's question. This data is FRESH from the database and reflects the most recent updates.\n\n`;
+      conversationContext += `PRIORITY-ORDERED INFORMATION (FRESH DATA):\n${contextContent}\n\n`;
+      conversationContext += `STRICT RULE: If the user asks about something mentioned in item #1, use ONLY item #1. Ignore all other items. If item #1 doesn't answer the question, then check item #2, and so on. This ensures you're using the most up-to-date information.\n\n`;
       conversationContext += `EXAMPLE: If user asks "Who is the CEO?" and item #1 mentions a CEO, use ONLY that information. Do not look at other items.\n\n`;
     }
-    // PRIORITY 2: If no specific context, use enhanced company context
+    // PRIORITY 2: If no specific context, get fresh data directly from database
     else if (isCompanyDataQuery(latestMessage.content) || isEnhanced) {
-      console.log('🔍 DEBUG: Using enhanced company context');
-      const companyContext = await getCompanyDataContext(latestMessage.content);
-      if (companyContext.length > 0) {
-        const contextContent = companyContext.map(item => 
-          `${item.title || item.question}: ${item.content || item.answer}`
+      console.log('🔍 DEBUG: Getting fresh company context directly from database');
+      
+      // Get fresh context data with real-time database queries
+      const freshContext = await getFreshContextData(latestMessage.content, 6);
+      
+      if (freshContext.length > 0) {
+        const contextContent = freshContext.map((item, index) => 
+          `${index + 1}. ${item.title}: ${item.content}`
         ).join('\n\n');
         
-        conversationContext += `Here is company information that may help answer the user's question:\n\n${contextContent}\n\n`;
+        conversationContext += `FRESH DATABASE INFORMATION (Real-time data):\n${contextContent}\n\n`;
+        conversationContext += `NOTE: This information was just retrieved from the database and reflects the most recent updates.\n\n`;
+      } else {
+        // Fallback to comprehensive company context
+        const companyContext = await getCompanyDataContext(latestMessage.content);
+        if (companyContext.length > 0) {
+          const contextContent = companyContext.map(item => 
+            `${item.title || item.question}: ${item.content || item.answer}`
+          ).join('\n\n');
+          
+          conversationContext += `Here is company information that may help answer the user's question:\n\n${contextContent}\n\n`;
+        }
       }
     }
 
@@ -174,7 +258,7 @@ const generateResponse = async (messages, context = null, isEnhanced = false) =>
       conversationContext += `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
     });
 
-    const prompt = `${conversationContext}\n\nPlease respond to the user's latest message: "${latestMessage.content}"\n\nRemember: If specific information was provided above, use ONLY that information. Do not supplement with general knowledge.`;
+    const prompt = `${conversationContext}\n\nPlease respond to the user's latest message: "${latestMessage.content}"\n\nRemember: If specific information was provided above, use ONLY that information. Do not supplement with general knowledge. Always use the most recent and highest priority information available.`;
 
     const startTime = Date.now();
 
@@ -193,6 +277,8 @@ const generateResponse = async (messages, context = null, isEnhanced = false) =>
         responseTime,
         contextUsed: context ? context.length : 0,
         isCompanyQuery: isCompanyDataQuery(latestMessage.content) || isEnhanced,
+        freshDataUsed: true, // Indicate that fresh data was used
+        timestamp: new Date().toISOString()
       },
     };
   } catch (error) {
@@ -295,4 +381,5 @@ module.exports = {
   checkAPIHealth,
   isCompanyDataQuery,
   getCompanyDataContext,
+  getFreshContextData,
 };
